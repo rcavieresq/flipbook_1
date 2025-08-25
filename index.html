@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Mi Flipbook</title>
+  <!-- StPageFlip (MIT) -->
+  <link rel="stylesheet" href="https://unpkg.com/stpageflip/dist/css/stpageflip.min.css">
+  <style>
+    html, body { height:100%; margin:0; background:#f2f2f2; }
+    .wrap { height:100vh; display:flex; align-items:center; justify-content:center; }
+    #flipbook { width: 90vw; height: 80vh; box-shadow: 0 10px 30px rgba(0,0,0,.15); }
+    /* Controles simples */
+    .controls{ position:fixed; bottom:16px; left:50%; transform:translateX(-50%);
+      display:flex; gap:8px; background:#fff; padding:8px 12px; border-radius:999px;
+      box-shadow:0 6px 18px rgba(0,0,0,.15); font-family:system-ui, sans-serif }
+    .controls button{ border:0; padding:8px 12px; border-radius:8px; cursor:pointer; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div id="flipbook"></div>
+  </div>
+
+  <div class="controls">
+    <button id="prev">◀︎</button>
+    <button id="next">▶︎</button>
+    <button id="zoomIn">＋</button>
+    <button id="zoomOut">－</button>
+  </div>
+
+  <script src="https://unpkg.com/stpageflip/dist/js/stpageflip.min.js"></script>
+  <script>
+    // ==== CONFIGURA AQUÍ ====
+    const TOTAL_PAGES = 24;                 // ← cambia al total de páginas que tengas
+    const PATH = 'pages/page-';             // ← carpeta/nombre base
+    const EXT = '.jpg';                     // ← '.jpg' o '.png'
+    const PAD = 3;                          // ← ceros a la izquierda: 001, 002...
+
+    // Genera nombres: page-001.jpg, page-002.jpg, ...
+    const pad = (n, width) => String(n).padStart(width, '0');
+
+    // Crea la instancia del flipbook
+    const flipbook = new St.PageFlip(
+      document.getElementById('flipbook'),
+      {
+        width: 900,            // ancho base (se escala responsivo)
+        height: 600,           // alto base
+        size: 'stretch',
+        minWidth: 300,
+        maxWidth: 2200,
+        minHeight: 300,
+        maxHeight: 3000,
+        maxShadowOpacity: 0.2,
+        showCover: true,       // la primera página como tapa
+        mobileScrollSupport: true,
+        useMouseEvents: true,
+        flippingTime: 700      // ms de animación
+      }
+    );
+
+    // Carga dinámica de páginas
+    const pages = [];
+    for (let i = 1; i <= TOTAL_PAGES; i++) {
+      const src = `${PATH}${pad(i, PAD)}${EXT}`;
+      pages.push({ type: 'image', src });
+    }
+    flipbook.loadFromImages(pages.map(p => p.src));
+
+    // Controles
+    document.getElementById('prev').onclick = () => flipbook.flipPrev();
+    document.getElementById('next').onclick = () => flipbook.flipNext();
+
+    let zoom = 1;
+    const applyZoom = () => {
+      document.getElementById('flipbook').style.transform = `scale(${zoom})`;
+      document.getElementById('flipbook').style.transformOrigin = 'center center';
+    };
+    document.getElementById('zoomIn').onclick = () => { zoom = Math.min(1.6, zoom + 0.1); applyZoom(); };
+    document.getElementById('zoomOut').onclick = () => { zoom = Math.max(0.7, zoom - 0.1); applyZoom(); };
+  </script>
+</body>
+</html>
